@@ -1,29 +1,62 @@
 # AGENTS.md — Bristol
 
-## Project overview
+## 项目概述
 
-**The project directory is currently empty.** As of the last inspection (verified with `ls -la` and a full recursive file scan), `F:\Kimi_project\Bristol` contains no source files, no configuration/manifest files (no `pyproject.toml`, `package.json`, `Cargo.toml`, `pom.xml`, `go.mod`, etc.), no build scripts, no test suite, no documentation, and no version-control metadata (no `.git`).
+**课题：高尔顿板群智网络（Galton Swarm Network）** —— 用受随机过程支配的粒子群体（"bean"）取代梯度回归的神经网络研究。
 
-Consequently, at this time there is:
+核心愿景：信息落入网络 → 群体在"集体智能"决策下分流（钉板偏转 + 拥挤耦合）→ 终点计数给出统计结果。**训练全程无梯度下降**（NES 进化策略），随机过程即计算本身。
 
-- **No technology stack** to identify — no dependency manifests or lockfiles exist.
-- **No build process or runtime architecture** — no build scripts, entry points, or modules.
-- **No code organization** — no source tree or module divisions.
-- **No project-specific conventions, testing strategy, or deployment process** — nothing to infer from.
+## 当前状态（2026-09-19）
 
-Do not assume any language, framework, or tooling for this project. Anything you need to know must come from files that actually exist here, or from explicit instructions in the conversation.
+- 已完成对旧版 MDU 网络的审计（三问三败，结论见 `legacy/galton_sde_fixed.py` 头注与 `reports/` 待建）
+- 新原型 `galton_swarm.py` 已提交：**待 Colab 首轮训练验证**（本地无法运行，见下）
+- 尚无真实数据实验；默认跑合成高斯簇数据
 
-## Status of standard AGENTS.md sections
+## 目录结构
 
-The sections below are the ones this file should contain once the project exists. They are listed as pending so future agents know what still needs to be filled in from real project content:
+```
+Bristol/
+├── galton_swarm.py        # 当前原型：GaltonSwarm + NES 训练 + 探针可视化（自上而下脚本，Colab 直接 %run）
+├── legacy/
+│   └── galton_sde_fixed.py # 旧 MDU 遗留代码，仅存档参考，勿直接运行（数据路径指向 Drive 且含审计出的结构缺陷）
+└── requirements.txt       # torch>=2.1, numpy>=1.24, matplotlib>=3.7（Colab 预装）
+```
 
-- [ ] Build and test commands — *pending; no build system exists yet*
-- [ ] Code style guidelines — *pending; no source code exists yet*
-- [ ] Testing instructions — *pending; no tests exist yet*
-- [ ] Security considerations — *pending; nothing to assess yet*
+## 运行方式
 
-## Guidance for future agents
+**本地 Windows 机器没有 Python/PyTorch，不能运行训练；只能做静态检查。一切执行在 Colab。**
 
-1. **Verify before documenting.** Re-scan the directory (including hidden files) before relying on this file. If code has appeared since the last update, rewrite this file from the actual content — do not append.
-2. **Rewrite, don't accumulate.** When the project takes shape, replace this placeholder entirely with a real overview grounded in the actual files.
-3. **Match the project's language.** Write this file in the natural language used by the project's comments and documentation.
+Colab 首格：
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+!git clone https://github.com/Jakoco/Bristol.git
+%cd Bristol
+!pip install -r requirements.txt
+# 重连时：%cd Bristol && !git pull
+```
+
+训练：`%run galton_swarm.py`（GPU 约 1–2 分钟，600 代 NES）。冒烟：把 `CFG['es']['gens']` 调到 5–10。
+
+换真实数据：改 `galton_swarm.py` 第 1 节注释处（Drive 的 `F_data_X/F_data_Y`），替换 `make_blobs` 调用即可，分割/标准化代码复用。
+
+## 设计准则（对应旧 MDU 审计结论）
+
+1. **全局无梯度下降**：训练只用 NES（反对称采样 + 居中秩），全文零 `loss.backward()`；参数声明为 buffer，物理上进不了计算图。
+2. **读出 = 计数**：类别分布是终点位置的 soft 直方图，禁止线性投影头（无 slots/einsum）。
+3. **粒子是持久实体，采样全程开启**：训练/推理都不去噪（旧 MDU 的 `noise.zero_()` 是死刑点）。
+4. **交互 = 介质耦合**：群密度 ρ 逐排回授钉子偏置（拥挤侧向力）；禁止用"特征图"冒充智能体。
+5. **可读性内建**：`probe()` 输出轨迹、密度场、逐时证据流；每轮实验必须保存并查看。
+
+## 关键超参（CFG）
+
+`P=256` 粒子数 / `T=24` 钉排数 / `G=33` 每排钉列 / `M=16` 上下文维度 / `mode='sde'|'bean'`。
+参数总量 ≈ 13.6k（编码器 + 钉子偏置 + 钉子上下文权重）。
+
+## 维护原则
+
+- 每轮 Colab 实验后：结果结论记入本文件"当前状态"与 `reports/`（建目录后），例：配置 X → 结果 Y → 结论 Z
+- 改动训练/读出/交互结构 = 大改动，先更新本文件的设计准则再写代码
+- `legacy/` 下的旧代码不要修复、不要运行，只作历史对照
+- 只放稳定具体的知识：命令给全、参数给值，不给"运行训练脚本"这种空话
