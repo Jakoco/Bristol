@@ -8,15 +8,17 @@
 
 ## 当前状态（2026-09-19）
 
-- 已完成对旧版 MDU 网络的审计（三问三败，结论见 `legacy/galton_sde_fixed.py` 头注与 `reports/` 待建）
-- 新原型 `galton_swarm.py` 已提交：**待 Colab 首轮训练验证**（本地无法运行，见下）
-- 尚无真实数据实验；默认跑合成高斯簇数据
+- 首轮实验完成（合成数据）：**val acc 0.9619**（14 类，随机 0.071），详见 `reports/2026-09-19_galton_swarm_v1.md`，tag `exp-swarm-v1`
+- 关键发现：分类决策主要发生在末段钉排（t≈15–24）；读出=计数成立，内部状态可读且携带分类信息
+- 待办：测试集 acc 待补记；确认 Colab 硬件（3569s 偏慢，疑似 CPU runtime）；下轮换真实 Drive 数据
+- 旧 MDU 审计结论见 `legacy/galton_sde_fixed.py`（仅存档，勿运行）
 
 ## 目录结构
 
 ```
 Bristol/
 ├── galton_swarm.py        # 当前原型：GaltonSwarm + NES 训练 + 探针可视化（自上而下脚本，Colab 直接 %run）
+├── reports/               # 每轮实验记录：配置 X / 结果 Y / 结论 Z
 ├── legacy/
 │   └── galton_sde_fixed.py # 旧 MDU 遗留代码，仅存档参考，勿直接运行（数据路径指向 Drive 且含审计出的结构缺陷）
 └── requirements.txt       # torch>=2.1, numpy>=1.24, matplotlib>=3.7（Colab 预装）
