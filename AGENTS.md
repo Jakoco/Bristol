@@ -8,9 +8,10 @@
 
 ## 当前状态（2026-09-19）
 
-- 首轮实验完成（合成数据）：**val acc 0.9619**（14 类，随机 0.071），详见 `reports/2026-09-19_galton_swarm_v1.md`，tag `exp-swarm-v1`
-- 关键发现：分类决策主要发生在末段钉排（t≈15–24）；读出=计数成立，内部状态可读且携带分类信息
-- 待办：测试集 acc 待补记；确认 Colab 硬件（3569s 偏慢，疑似 CPU runtime）；下轮换真实 Drive 数据
+- 首轮实验完成（合成数据，Colab CPU）：**val acc 0.9619 / test acc 0.9571**（14 类，随机 0.071，单次前向离散度 ±0.0029），详见 `reports/2026-09-19_galton_swarm_v1.md`，tag `exp-swarm-v1`
+- 关键发现：分类决策主要发生在末段钉排（t≈15–24）；P=256 群体在直方图层面自我平均，推理几乎无随机方差
+- checkpoint 存于 Drive：`/content/drive/MyDrive/Checkpoints/galton_swarm.pt`
+- 待办：下轮换真实 Drive 数据，Colab 记得选 GPU runtime（本轮 CPU 3569s 属正常）；图标题中文乱码待修
 - 旧 MDU 审计结论见 `legacy/galton_sde_fixed.py`（仅存档，勿运行）
 
 ## 目录结构
