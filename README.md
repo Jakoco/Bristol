@@ -2,7 +2,7 @@
 # Kimi Code 云端研究工作流说明书
 
 > 适用场景：本地电脑性能弱（跑不了 PyTorch），训练在 Colab，代码由 Kimi Code 管理。
-> 角色分工：**本地电脑 = 指挥官，Kimi Code = 工程师，GitHub = 仓库，Colab = 算力，Google Drive = 存档。**
+> 角色分工：**GitHub -> 线上仓库，Colab -> 云端训练，Google Drive -> 云存档。**
 
 ---
 
@@ -20,10 +20,10 @@ Colab（GPU 训练，每次开机 git clone/pull）
 Google Drive（断点续训、实验结果，唯一持久化存储）
 ```
 
-**铁律**：
-1. 代码只信 GitHub——本地和 Colab 都可能丢，推上去才算数。
-2. Checkpoint 只信 Drive——Colab 的本地磁盘随时被回收。
-3. 每轮实验结论写进 AGENTS.md——它是 Kimi Code 的"项目记忆"。
+**特别注意**：
+1. 所有代码一定归档 GitHub。
+2. Checkpoint 务必存入 Colab Drive。
+3. 每轮试验结束后，要把结论写进AGENTS.md，它是kimi code冷启动的云端记忆。
 
 ---
 
